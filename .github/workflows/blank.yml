@@ -1,36 +1,45 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+      - name: failure
+        run: exit 1
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+  build2:
+    runs-on: ubuntu-latest
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+    steps:
+      - name: success
+        run: exit 0
+
+  completed:
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - build
+      - build2
+
+    steps:
+      - name: Check job1 result and fail if job1 failed
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          if [ "${{ needs.build.result }}" != "success" ]  || [ "${{ needs.build.result }}" == "skipped" ]; then
+            exit 1 
+          fi
+
+          if [ "${{ needs.build2.result }}" != "success" ]  || [ "${{ needs.build2.result }}" == "skipped" ]; then
+            exit 1 
+          fi
+
+      - name: check
+        run: echo completed
