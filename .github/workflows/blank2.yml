@@ -1,4 +1,4 @@
-name: slow CI
+name: CI
 
 on:
   push:
@@ -16,21 +16,20 @@ jobs:
       - name: success
         run: exit 0
 
-  slow-job:
+  build2:
     runs-on: ubuntu-latest
+    if: false
 
     steps:
-      - name: sleep
-        run: sleep 300
-      - name: fail
-        run: exit 1
+      - name: success
+        run: exit 0
 
   completed:
     runs-on: ubuntu-latest
     if: always()
     needs:
       - build
-      - slow-job
+      - build2
 
     steps:
       - name: Check needs results and fail if any of the job failed
